@@ -1,13 +1,28 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/tsjspBnvr1r
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-import { Button } from "@/components/ui/button"
+"use client"
+import React from 'react';
+import io from 'socket.io-client';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import Link from "next/link";
 
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001');import { Button } from "@/components/ui/button"
+
 export default function Component() {
+    React.useEffect(() => {
+        // Join a game room when the component mounts
+        socket.emit('joinGameRoom', { room: 'public' });
+
+        // Listen for other players joining
+        socket.on('playerJoined', (data) => {
+            console.log(`Player ${data.player} joined the game.`);
+        });
+
+        // Cleanup on unmount
+        return () => {
+            // Leave the game room when the component unmounts
+            socket.emit('leaveGameRoom', { room: 'public' });
+        };
+    }, []);
+
     return (
         <section className="px-4 py-12 md:py-24">
             <div>
