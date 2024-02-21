@@ -1,19 +1,14 @@
 "use client"
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/7WSwJw2dk7j
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
+
 import {CardHeader, CardContent, Card} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
-import {JSX, SVGProps} from "react";
-import React from "react";
+import React, {JSX, SVGProps} from "react";
 import io from "socket.io-client";
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001');
 
 
-export default function Component() {
+export default function Page() {
     const [question, setQuestion] = React.useState<string>('');
     const [hint, setHint] = React.useState<string>('');
     const [openHint, setOpenHint] = React.useState(false);
