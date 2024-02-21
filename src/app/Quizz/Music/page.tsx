@@ -15,6 +15,8 @@ const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001')
 
 export default function Component() {
     const [question, setQuestion] = React.useState<string>('');
+    const [hint, setHint] = React.useState<string>('');
+    const [openHint, setOpenHint] = React.useState(false);
     const [answers, setAnswers] = React.useState<{ text: string; isTrue: boolean }[]>([]);
 
     React.useEffect(() => {
@@ -25,9 +27,7 @@ export default function Component() {
         // Listen for new questions in real-time
         socket.on('newQuestion', (data) => {
             setQuestion(data.question);
-
-            console.log(data.answers);
-
+            setHint(data.hint);
             setAnswers(data.answers);
         });
 
@@ -64,7 +64,14 @@ export default function Component() {
             <CardContent className="grid gap-4">
                 <div className="font-semibold">{question}</div>
                 <div className="grid gap-4">{renderAnswers()}</div>
-                <Button className="w-full" onClick={handleNewQuestion}>Submit</Button>
+
+                <div className="flex w-full items-center space-x-2">
+                    <Button onClick={handleNewQuestion} className="flex-1">Submit</Button>
+                    <Button onClick={() => setOpenHint(true)}>Get hint</Button>
+                </div>
+                {openHint && (<div className="border rounded p-4">
+                    <p className="text-sm font-light m-0">{hint}</p>
+                </div>)}
             </CardContent>
         </Card>
     )
