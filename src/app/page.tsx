@@ -31,6 +31,11 @@ export default function Page() {
         socket.emit('chooseTheme', {theme});
     };
 
+    React.useEffect(() => {
+        handleQuizTheme('')
+    }, []);
+
+
     return (
         <div className="flex flex-col h-screen">
             <header className="relative z-10">
