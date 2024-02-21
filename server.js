@@ -17,6 +17,9 @@ const io = new Server(server, {
     },
 });
 
+let quizTheme = ""
+let quizDifficulty = ""
+
 io.on('connection', (socket) => {
     console.log(`User ${socket.id} connected`);
 
@@ -33,9 +36,21 @@ io.on('connection', (socket) => {
         socket.leave(data.room);
     });
 
+    socket.on('chooseTheme', (data) => {
+        quizTheme = data.theme;
+        console.log(`Quiz theme: ${quizTheme}`);
+    });
+
+    socket.on('startQuiz', (data) => {
+        const {difficulty, room} = data;
+        quizDifficulty = difficulty
+        console.log(`Quiz started in room ${room} with difficulty: ${difficulty}`);
+    });
+
     socket.on('requestNewQuestion', async () => {
         try {
-            const questionPrompt = `Generate a trivia question about music.`;
+            const questionPrompt = `Generate a trivia question about the following theme: ${quizTheme}.
+             The level of difficulty must be ${quizDifficulty}.`;
             const questionResponse = await openai.chat.completions.create({
                 model: 'gpt-3.5-turbo',
                 messages: [
