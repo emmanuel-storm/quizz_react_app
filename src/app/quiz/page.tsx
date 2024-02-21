@@ -13,6 +13,8 @@ export default function Page() {
     const [hint, setHint] = React.useState<string>('');
     const [openHint, setOpenHint] = React.useState(false);
     const [answers, setAnswers] = React.useState<{ text: string; isTrue: boolean }[]>([]);
+    const [selectedAnswer, setSelectedAnswer] = React.useState<string>('');
+    const [resultMessage, setResultMessage] = React.useState<string>('');
 
     React.useEffect(() => {
         // Request a new question when the component mounts
@@ -23,7 +25,10 @@ export default function Page() {
         socket.on('newQuestion', (data) => {
             setQuestion(data.question);
             setHint(data.hint);
+            setOpenHint(false)
             setAnswers(data.answers);
+            setSelectedAnswer('');
+            setResultMessage('');
         });
 
         // Cleanup on unmount
@@ -37,9 +42,26 @@ export default function Page() {
         socket.emit('requestNewQuestion');
     };
 
+    const handleAnswerClick = (answer: string) => {
+        if (!selectedAnswer) {
+            setSelectedAnswer(answer);
+
+            const selectedAnswerObject = answers.find((ans) => ans.text === answer);
+            if (selectedAnswerObject) {
+                setResultMessage(selectedAnswerObject.isTrue ? 'Correct!' : `Incorrect! The response was ${answers.find((ans) => ans.isTrue)?.text}`);
+            }
+        }
+    };
+
     const renderAnswers = () => {
         return answers.map((answer, index) => (
-            <Button key={index} className="w-full justify-start" variant="outline">
+            <Button
+                key={index}
+                className={`w-full justify-start ${selectedAnswer === answer.text ? 'bg-gray-300' : ''}`}
+                variant="outline"
+                onClick={() => handleAnswerClick(answer.text)}
+                disabled={!!selectedAnswer}
+            >
                 <span className="grid gap-1">
                     <span>{answer.text}</span>
                 </span>
@@ -56,17 +78,26 @@ export default function Page() {
                 <UsersIcon className="h-4 w-4 mr-2"/>
                 <div>12</div>
             </CardHeader>
+
             <CardContent className="grid gap-4">
                 <div className="font-semibold">{question}</div>
+
                 <div className="grid gap-4">{renderAnswers()}</div>
 
+                {resultMessage && <div
+                    className={`text-center mt-4 ${resultMessage.includes('Correct') ? 'text-green-500' : 'text-red-500'}`}>
+                    {resultMessage}
+                </div>}
+
                 <div className="flex w-full items-center space-x-2">
-                    <Button onClick={handleNewQuestion} className="flex-1">Submit</Button>
+                    <Button onClick={handleNewQuestion} className="flex-1">Next question</Button>
                     <Button onClick={() => setOpenHint(true)}>Get hint</Button>
                 </div>
+
                 {openHint && (<div className="border rounded p-4">
                     <p className="text-sm font-light m-0">{hint}</p>
                 </div>)}
+
             </CardContent>
         </Card>
     )
